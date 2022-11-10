@@ -12,8 +12,11 @@ function handleMessage(ws: WebSocket, data: string) {
     if (reply === "exit") {
         return ws.close();
     }
-    else if (reply.startsWith("join: ")) {
+    else if (reply.startsWith("/join ")) {
         ws.send(JSON.stringify({ type: "join-room", payload: { username: "client", data: reply.slice(6) } }));
+    }
+    else if (reply.startsWith("/getall")){
+        ws.send(JSON.stringify({type: "get-rooms"}))
     }
     else {
         ws.send(JSON.stringify({ type: "message", payload: { username: "client", data: reply } }));
