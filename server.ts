@@ -12,6 +12,7 @@ function removeFromRooms(ws: WebSocket) {
     if (wsArray.includes(ws)) {
       wsArray.splice(wsArray.indexOf(ws), 1);
     }
+    console.log(`users in room: ${wsArray.length}`)
     if (wsArray.length === 0){
       rooms.delete(room)
     }
@@ -42,7 +43,13 @@ function logError(msg: string) {
 }
 function handleConnected(ws: WebSocket) {
   console.log("Connected to client ...");
-  rooms.get("general")?.push(ws);
+  if (rooms.get("general")){
+    rooms.get("general")?.push(ws)
+  }
+  else{
+    rooms.set("general", [ws])
+  }
+  
   ws.send(
     JSON.stringify({ type: "MESSAGE", data: "Server: Welcome to the chat" }),
   );
