@@ -71,9 +71,39 @@ function handleMessage(ws: WebSocket, data: string) {
 function handleError(e: Event | ErrorEvent) {
   console.log(e instanceof ErrorEvent ? e.message : e.type);
 }
-function reqHandler(req: Request) {
+async function reqHandler(req: Request) {
   if (req.headers.get("upgrade") != "websocket") {
-    return new Response(null, { status: 501 });
+    const { pathname } = new URL(req.url);
+    if (pathname === "/"){
+      const file = await Deno.readFile("./dist/index.html");
+      return new Response(file, {
+        headers: {
+          "content-type": "text/html",
+        },
+      })
+    }
+    else {
+      const file = await Deno.readFile(`./dist${pathname}`);
+      let ext = pathname.split('.').pop()
+
+      if (ext === "js"){
+        ext = "javascript"
+      }
+
+      return new Response(file, {
+        headers: {
+          "content-type": `text/${ext}`
+        },
+      })
+    }
+    /*
+    const file = await Deno.readFile("./style.css");
+    // Respond to the request with the style.css file.
+    return new Response(file, {
+      headers: {
+        "content-type": "text/css",
+      },
+    });*/
   }
   const { socket: ws, response } = Deno.upgradeWebSocket(req);
   ws.onopen = () => handleConnected(ws);
