@@ -8,9 +8,15 @@ export interface Payload {
 const rooms = new Map<string, WebSocket[]>();
 
 function removeFromRooms(ws: WebSocket) {
-  rooms.forEach((wsArray) => {
+  rooms.forEach((wsArray, room) => {
     if (wsArray.includes(ws)) {
       wsArray.splice(wsArray.indexOf(ws), 1);
+      if (wsArray.length === 1){
+        rooms.delete(room)
+      }
+    }
+    if (wsArray.length === 0){
+      rooms.delete(room)
     }
   });
 }
@@ -31,6 +37,7 @@ function broadcastRoom(ws: WebSocket, message: string) {
       );
     }
   });
+
 }
 
 function logError(msg: string) {
