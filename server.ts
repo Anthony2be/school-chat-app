@@ -7,6 +7,8 @@ export interface Payload {
 
 const rooms = new Map<string, WebSocket[]>();
 
+const channel = new BroadcastChannel("")
+
 function removeFromRooms(ws: WebSocket) {
   rooms.forEach((wsArray, room) => {
     if (wsArray.includes(ws)) {
@@ -54,6 +56,7 @@ function handleConnected(ws: WebSocket) {
     JSON.stringify({ type: "MESSAGE", data: "Server: Welcome to the chat" }),
   );
 }
+
 function handleMessage(ws: WebSocket, data: string) {
   const { type, payload }: { type: string; payload: Payload } = JSON.parse(
     data,
@@ -78,6 +81,7 @@ function handleMessage(ws: WebSocket, data: string) {
     case "get-rooms":
       ws.send(JSON.stringify({ type: "ROOMS", data: [...rooms.keys()] }));
   }
+
 }
 function handleError(e: Event | ErrorEvent) {
   console.log(e instanceof ErrorEvent ? e.message : e.type);
@@ -119,6 +123,10 @@ async function reqHandler(req: Request) {
   const { socket: ws, response } = Deno.upgradeWebSocket(req);
   ws.onopen = () => handleConnected(ws);
   ws.onmessage = (m) => handleMessage(ws, m.data);
+  channel.onmessage = e => {
+    (e.target != channel) && channel.postMessage(e.data)
+    handleMessage(ws, e.data)
+  }
   ws.onclose = () => {
     removeFromRooms(ws);
     logError("Disconnected from client ...");
