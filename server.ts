@@ -125,8 +125,7 @@ async function reqHandler(req: Request) {
   ws.onopen = () => handleConnected(ws);
   ws.onmessage = (m) => handleMessage(ws, m.data);
   channel.onmessage = e => {
-    (e.target != channel) && channel.postMessage(e.data)
-    handleMessage(ws, e.data)
+    (e.target != channel) && handleMessage(ws, e.data)
   }
   ws.onclose = () => {
     removeFromRooms(ws);
