@@ -61,6 +61,7 @@ function handleMessage(ws: WebSocket, data: string) {
   const { type, payload }: { type: string; payload: Payload } = JSON.parse(
     data,
   );
+  channel.postMessage(data)
   switch (type) {
     case "join-room":
       console.log("h");
