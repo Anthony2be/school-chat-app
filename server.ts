@@ -7,7 +7,7 @@ export interface Payload {
 
 const rooms = new Map<string, WebSocket[]>();
 
-const channel = new BroadcastChannel(crypto.randomUUID())
+const channel = new BroadcastChannel("")
 
 function removeFromRooms(ws: WebSocket) {
   rooms.forEach((wsArray, room) => {
