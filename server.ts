@@ -129,7 +129,6 @@ async function reqHandler(req: Request) {
     if (e.target == channel){
       handleMessage(ws, e.data)
     }
-    (e.target != channel) && handleMessage(ws, e.data)
   }
   ws.onclose = () => {
     removeFromRooms(ws);
