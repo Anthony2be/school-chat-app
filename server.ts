@@ -62,7 +62,6 @@ function handleMessage(ws: WebSocket, data: string) {
     data,
   );
   channel.postMessage(data)
-  console.log(data)
   switch (type) {
     case "join-room":
       console.log("h");
@@ -126,7 +125,7 @@ async function reqHandler(req: Request) {
   ws.onopen = () => handleConnected(ws);
   ws.onmessage = (m) => handleMessage(ws, m.data);
   channel.onmessage = e => {
-    console.log("channel message");
+    console.log(e.data);
     
     (e.target != channel) && handleMessage(ws, e.data)
   }
