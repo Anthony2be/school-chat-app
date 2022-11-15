@@ -125,7 +125,8 @@ async function reqHandler(req: Request) {
   ws.onopen = () => handleConnected(ws);
   ws.onmessage = (m) => handleMessage(ws, m.data);
   channel.onmessage = e => {
-    console.log(e.data);
+    console.log(e.target)
+    console.log(channel)
     if (e.target !== channel){
       handleMessage(ws, e.data)
     }
