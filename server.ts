@@ -61,7 +61,7 @@ function handleMessage(ws: WebSocket, data: string, e:MessageEvent) {
   const { type, payload }: { type: string; payload: Payload } = JSON.parse(
     data,
   );
-  if (e.target == channel){ return }
+  if (e.target == channel){ console.log('hi');return }
   channel.postMessage(data)
   switch (type) {
     case "join-room":
