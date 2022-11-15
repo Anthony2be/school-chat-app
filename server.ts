@@ -57,10 +57,11 @@ function handleConnected(ws: WebSocket) {
   );
 }
 
-function handleMessage(ws: WebSocket, data: string) {
+function handleMessage(ws: WebSocket, data: string, e:MessageEvent) {
   const { type, payload }: { type: string; payload: Payload } = JSON.parse(
     data,
   );
+  if (e.target == channel){ return }
   channel.postMessage(data)
   switch (type) {
     case "join-room":
@@ -123,12 +124,12 @@ async function reqHandler(req: Request) {
   }
   const { socket: ws, response } = Deno.upgradeWebSocket(req);
   ws.onopen = () => handleConnected(ws);
-  ws.onmessage = (m) => handleMessage(ws, m.data);
+  ws.onmessage = (m) => handleMessage(ws, m.data, m);
   channel.onmessage = e => {
     console.log(e.target)
     console.log(channel)
     if (e.target == channel){
-      handleMessage(ws, e.data)
+      handleMessage(ws, e.data, e)
     }
   }
   ws.onclose = () => {
