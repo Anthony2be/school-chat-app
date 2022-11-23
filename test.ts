@@ -1,33 +1,33 @@
 // listenAndServe is the Deno standard mechanism for creating an HTTP server
 // https://deno.land/manual/examples/http_server#using-the-codestdhttpcode-library
-import { listenAndServe } from "https://deno.land/std/http/server.ts"
+import { serve } from "https://deno.land/std/http/mod.ts";
 
 // Set of all of the currently open WebSocket connections from browsers
 const sockets = new Set<WebSocket>(),
-/*
-BroadcastChannel is a concept that is unique to the Deno Deploy environment.
-
-https://deno.com/deploy/docs/runtime-broadcast-channel/
-
-It is modelled after the browser API of the same name.
-
-It sets up a channel between ALL instances of the server-side script running
-in every one of the Deno Deploy global network of data centers.
-
-The argument is the name of the channel, which apparently can be an empty string.
-*/
+    /*
+    BroadcastChannel is a concept that is unique to the Deno Deploy environment.
+    
+    https://deno.com/deploy/docs/runtime-broadcast-channel/
+    
+    It is modelled after the browser API of the same name.
+    
+    It sets up a channel between ALL instances of the server-side script running
+    in every one of the Deno Deploy global network of data centers.
+    
+    The argument is the name of the channel, which apparently can be an empty string.
+    */
     channel = new BroadcastChannel(""),
-    headers = {"Content-type": "text/html"},
-/*
-This is the bare-bones HTML for the browser side of the application
-
-It creates a WebSocket connection back to the host, and sets it up so any
-message that arrives via that WebSocket will be appended to the textContent
-of the pre element on the page.
-
-The input element has an onkeyup that checks for the Enter key and sends
-the value of that element over the WebSocket channel to the server.
-*/
+    headers = { "Content-type": "text/html" },
+    /*
+    This is the bare-bones HTML for the browser side of the application
+    
+    It creates a WebSocket connection back to the host, and sets it up so any
+    message that arrives via that WebSocket will be appended to the textContent
+    of the pre element on the page.
+    
+    The input element has an onkeyup that checks for the Enter key and sends
+    the value of that element over the WebSocket channel to the server.
+    */
     html = `<script>let ws = new WebSocket("wss://"+location.host)
 ws.onmessage = e => pre.textContent += e.data+"\\n"</script>
 <input onkeyup="event.key=='Enter'&&ws.send(this.value)"><pre id=pre>`
@@ -53,42 +53,54 @@ I tried removing the await here and the demo still worked.
 But https://deno.land/std@0.113.0/http/server.ts#L224 shows that this function
 is indeed an async that returns a Promise.
 */
-await listenAndServe(":8080", (r: Request) => {
-    try {
-        /*
-        Deno.upgradeWebSocket is a relatively new feature, added in Deno v1.12
-        in July 2021:
-        https://deno.com/blog/v1.12#server-side-websocket-support-in-native-http
+// await listenAndServe(":8080", (r: Request) => {
+//     try {
+//         /*
+//         Deno.upgradeWebSocket is a relatively new feature, added in Deno v1.12
+//         in July 2021:
+//         https://deno.com/blog/v1.12#server-side-websocket-support-in-native-http
         
-        It gives you back a response that you should return to the client in order
-        to finish establishing the WebSocket connection, and a socket object which
-        you can then use for further WebSocket communication.
-        */
-        const { socket, response } = Deno.upgradeWebSocket(r)
-        // Add it to the set so we can send to all of them later
-        sockets.add(socket)
-        /*
-        This is a sneaky hack: when a message arrives from the WebSocket we pass it
-        directly to the BroadcastChannel - then use the e.target != channel check
-        above to broadcast it on to every other global instance.
-        */
-        socket.onmessage = channel.onmessage
-        // When browser disconnects, remove the socket from the set of sockets
-        socket.onclose = _ => sockets.delete(socket)
-        return response
-    } catch {
-    /*
-    I added code here to catch(e) and display e.toString() which showed me
-    that the exception caught here is:
-
-      exception: TypeError: Invalid Header: 'upgrade' header must be 'websocket'
-
-    This is an exception thrown by Deno.upgradeWebSocket(r) if the incoming
-    request does not include the "upgrade: websocket" HTTP header, which
-    is added by browsers when using new WebSocket("wss://...")
+//         It gives you back a response that you should return to the client in order
+//         to finish establishing the WebSocket connection, and a socket object which
+//         you can then use for further WebSocket communication.
+//         */
+//         const { socket, response } = Deno.upgradeWebSocket(r)
+//         // Add it to the set so we can send to all of them later
+//         sockets.add(socket)
+//         /*
+//         This is a sneaky hack: when a message arrives from the WebSocket we pass it
+//         directly to the BroadcastChannel - then use the e.target != channel check
+//         above to broadcast it on to every other global instance.
+//         */
+//         socket.onmessage = channel.onmessage
+//         // When browser disconnects, remove the socket from the set of sockets
+//         socket.onclose = _ => sockets.delete(socket)
+//         return response
+//     } catch {
+//         /*
+//         I added code here to catch(e) and display e.toString() which showed me
+//         that the exception caught here is:
     
-    So here we return the HTML and headers for the application itself.
-    */
-    return new Response(html, {headers})
-  }
-})
+//           exception: TypeError: Invalid Header: 'upgrade' header must be 'websocket'
+    
+//         This is an exception thrown by Deno.upgradeWebSocket(r) if the incoming
+//         request does not include the "upgrade: websocket" HTTP header, which
+//         is added by browsers when using new WebSocket("wss://...")
+        
+//         So here we return the HTML and headers for the application itself.
+//         */
+//         return new Response(html, { headers })
+//     }
+// })
+
+async function reqHandler(req: Request) {
+    if (req.headers.get("upgrade") != "websocket") {
+        return new Response(html, { headers })
+    }
+    const { socket, response } = await Deno.upgradeWebSocket(req);
+    sockets.add(socket);
+    socket.onmessage = channel.onmessage;
+    socket.onclose = () => sockets.delete(socket);
+    return response;
+}
+serve(reqHandler, { port: 8000 });
