@@ -4,8 +4,9 @@
 <script type="module">
     import { html, Component, render, useState, useCallback } from 'https://unpkg.com/htm/preact/standalone.module.js';
 
+    let ws = new WebSocket("wss://"+location.host);
+
     function App() {
-        let ws = new WebSocket("wss://"+location.host);
 
         const [messages, setMessages] = useState([]);
         const [message, setMessage] = useState("");
@@ -33,7 +34,8 @@
 			</form>
         `
     }
-
-    render(html`<${App} page="All" />`, document.body);
+    ws.onopen = () => {
+        render(html`<${App} page="All" />`, document.body);
+    };
 </script>
 </html>
