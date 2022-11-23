@@ -15,7 +15,7 @@ function removeFromRooms(ws: WebSocket) {
       wsArray.splice(wsArray.indexOf(ws), 1);
     }
     console.log(`users in room: ${wsArray.length}`)
-    if (wsArray.length === 0){
+    if (wsArray.length === 0) {
       rooms.delete(room)
     }
   });
@@ -45,23 +45,22 @@ function logError(msg: string) {
 }
 function handleConnected(ws: WebSocket) {
   console.log("Connected to client ...");
-  if (rooms.get("general")){
+  if (rooms.get("general")) {
     rooms.get("general")?.push(ws)
   }
-  else{
+  else {
     rooms.set("general", [ws])
   }
-  
+
   ws.send(
     JSON.stringify({ type: "MESSAGE", data: "Server: Welcome to the chat" }),
   );
 }
 
-function handleMessage(ws: WebSocket, data: string, e:MessageEvent) {
+function handleMessage(ws: WebSocket, data: string) {
   const { type, payload }: { type: string; payload: Payload } = JSON.parse(
     data,
   );
-  if (e.target == channel){ console.log('hi');return }
   channel.postMessage(data)
   switch (type) {
     case "join-room":
@@ -90,47 +89,20 @@ function handleError(e: Event | ErrorEvent) {
 }
 async function reqHandler(req: Request) {
   if (req.headers.get("upgrade") != "websocket") {
-    const { pathname } = new URL(req.url);
-    if (pathname === "/"){
-      const file = await Deno.readFile("./dist/index.html");
-      return new Response(file, {
-        headers: {
-          "content-type": "text/html",
-        },
-      })
-    }
-    else {
-      const file = await Deno.readFile(`./dist${pathname}`);
-      let ext = pathname.split('.').pop()
-
-      if (ext === "js"){
-        ext = "javascript"
-      }
-
-      return new Response(file, {
-        headers: {
-          "content-type": `text/${ext}`
-        },
-      })
-    }
-    /*
-    const file = await Deno.readFile("./style.css");
-    // Respond to the request with the style.css file.
+    const file = await Deno.readFile("./index.html");
     return new Response(file, {
       headers: {
-        "content-type": "text/css",
+        "content-type": "text/html",
       },
-    });*/
+    })
   }
   const { socket: ws, response } = Deno.upgradeWebSocket(req);
   ws.onopen = () => handleConnected(ws);
-  ws.onmessage = (m) => handleMessage(ws, m.data, m);
+  ws.onmessage = (m) => handleMessage(ws, m.data);
   channel.onmessage = e => {
     console.log(e.target)
     console.log(channel)
-    if (e.target == channel){
-      handleMessage(ws, e.data, e)
-    }
+    handleMessage(ws, e.data)
   }
   ws.onclose = () => {
     removeFromRooms(ws);

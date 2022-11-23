@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<title>PCMS Chat App</title>
+<script type="module">
+    import { html, Component, render, useState, useCallback } from 'https://unpkg.com/htm/preact/standalone.module.js';
+
+    function Counter() {
+        const [value, setValue] = useState(0);
+        const increment = () => {
+            setValue(value + 1);
+        };
+
+        return html`
+            <div>
+                <p>Counter: ${value}</p>
+                <button onClick=${increment}>Increment</button>
+            </div>
+        `
+    }
+
+    render(html`<${Counter} page="All" />`, document.body);
+</script>
+</html>
