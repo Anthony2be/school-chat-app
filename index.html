@@ -4,17 +4,33 @@
 <script type="module">
     import { html, Component, render, useState, useCallback } from 'https://unpkg.com/htm/preact/standalone.module.js';
 
-    function Counter() {
-        const [value, setValue] = useState(0);
-        const increment = () => {
-            setValue(value + 1);
+    function App() {
+        let ws = new WebSocket("wss://"+location.host);
+
+        const [messages, setMessages] = useState([]);
+        const [message, setMessage] = useState("");
+        const send = (e) => {
+            e.preventDefault();
+            ws.send(message);
+        };
+        const setMessageText = useCallback((e) => {
+            setMessage(e.target.value);
+        }, []);
+
+        ws.onmessage = () => {
+            setMessages([...messages, message]);
         };
 
         return html`
-            <div>
-                <p>Counter: ${value}</p>
-                <button onClick=${increment}>Increment</button>
-            </div>
+			<form onSubmit=${send} action="javascript:">
+				<input value=${message} onInput=${setMessageText} />
+				<button type="submit">Add</button>
+				<ul>
+					${messages.map(m => html`
+						<li>${m}</li>
+					`)}
+				</ul>
+			</form>
         `
     }
 
