@@ -19,6 +19,8 @@
         }, []);
 
         ws.onmessage = () => {
+            console.log(message)
+            console.log(messages)
             setMessages([...messages, message]);
         };
 
