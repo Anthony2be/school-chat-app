@@ -12,7 +12,7 @@
         const [message, setMessage] = useState("");
         const send = (e) => {
             e.preventDefault();
-            if (message.length > 0) {
+            if (message.length > 0 & username.length > 0) {
                 ws.send(`${username.trim()}: ${message.trim()}`);
                 setMessage("");
             }
