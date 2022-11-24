@@ -34,7 +34,7 @@
                 <label for="username">Username: </label>
                 <input id="username" value=${username} onInput=${(e) => setUsername(e.target.value)}/>
 				<ul>
-					${messages.map(m => html`
+					${messages.reverse().map(m => html`
 						<li>${m}</li>
 					`)}
 				</ul>
