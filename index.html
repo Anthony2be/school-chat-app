@@ -7,13 +7,13 @@
     let ws = new WebSocket("wss://"+location.host);
 
     function App() {
-
+        const [username, setUsername] = useState("");
         const [messages, setMessages] = useState([]);
         const [message, setMessage] = useState("");
         const send = (e) => {
             e.preventDefault();
             if (message.length > 0) {
-                ws.send(message);
+                ws.send(`${username.trim()}: ${message.trim()}`);
                 setMessage("");
             }
         };
@@ -31,6 +31,8 @@
 			<form onSubmit=${send} action="javascript:">
 				<input value=${message} onInput=${setMessageText} />
 				<button type="submit">Add</button>
+                <label for="username">Username: </label>
+                <input id="username" value=${username} onInput=${(e) => setUsername(e.target.value)}>
 				<ul>
 					${messages.map(m => html`
 						<li>${m}</li>
