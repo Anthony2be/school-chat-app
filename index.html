@@ -24,7 +24,7 @@
         ws.onmessage = (d) => {
             console.log(d.data)
             console.log(messages)
-            setMessages([...messages, d.data]);
+            setMessages([...messages, d.data].reverse());
         };
 
         return html`
@@ -34,7 +34,7 @@
                 <label for="username">Username: </label>
                 <input id="username" value=${username} onInput=${(e) => setUsername(e.target.value)}/>
 				<ul>
-					${messages.reverse().map(m => html`
+					${messages.map(m => html`
 						<li>${m}</li>
 					`)}
 				</ul>
