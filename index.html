@@ -12,8 +12,10 @@
         const [message, setMessage] = useState("");
         const send = (e) => {
             e.preventDefault();
-            ws.send(message);
-            setMessage("");
+            if (message.length > 0) {
+                ws.send(message);
+                setMessage("");
+            }
         };
         const setMessageText = useCallback((e) => {
             setMessage(e.target.value);
