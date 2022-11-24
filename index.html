@@ -2,7 +2,7 @@
 <html lang="en">
 <title>PCMS Chat App</title>
 <script type="module">
-    import { html, Component, render, useState, useCallback } from 'https://unpkg.com/htm/preact/standalone.module.js';
+    import { html, Component, render, useState, useCallback, useEffect } from 'https://unpkg.com/htm/preact/standalone.module.js';
 
     let ws = new WebSocket("wss://"+location.host);
 
@@ -10,6 +10,11 @@
         const [username, setUsername] = useState("");
         const [messages, setMessages] = useState([]);
         const [message, setMessage] = useState("");
+
+        useEffect(() => {
+            setUsername(localStorage.getItem("username"));
+        }, []);
+
         const send = (e) => {
             e.preventDefault();
             if (message.length > 0 & username.length > 0) {
@@ -32,7 +37,7 @@
 				<input value=${message} onInput=${setMessageText} />
 				<button type="submit">Add</button>
                 <label for="username">Username: </label>
-                <input id="username" value=${username} onInput=${(e) => setUsername(e.target.value)}/>
+                <input id="username" value=${username} onInput=${(e) => {setUsername(e.target.value); localStorage.setItem("username", e.target.value)}}/>
 				<ul>
 					${messages.map(m => html`
 						<li>${m}</li>
