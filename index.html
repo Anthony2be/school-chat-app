@@ -19,10 +19,10 @@
             setMessage(e.target.value);
         }, []);
 
-        ws.onmessage = () => {
-            console.log(message)
+        ws.onmessage = (d) => {
+            console.log(d.data)
             console.log(messages)
-            setMessages([...messages, message]);
+            setMessages([...messages, d.data]);
         };
 
         return html`
