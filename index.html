@@ -32,7 +32,7 @@
 				<input value=${message} onInput=${setMessageText} />
 				<button type="submit">Add</button>
                 <label for="username">Username: </label>
-                <input id="username" value=${username} onInput=${(e) => setUsername(e.target.value)}>
+                <input id="username" value=${username} onInput=${(e) => setUsername(e.target.value)}/>
 				<ul>
 					${messages.map(m => html`
 						<li>${m}</li>
