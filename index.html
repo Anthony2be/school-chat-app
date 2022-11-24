@@ -24,7 +24,7 @@
         ws.onmessage = (d) => {
             console.log(d.data)
             console.log(messages)
-            setMessages([...messages, d.data].reverse());
+            setMessages([d.data, ...messages]);
         };
 
         return html`
