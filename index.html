@@ -13,6 +13,7 @@
         const send = (e) => {
             e.preventDefault();
             ws.send(message);
+            console.log(message);
         };
         const setMessageText = useCallback((e) => {
             setMessage(e.target.value);
